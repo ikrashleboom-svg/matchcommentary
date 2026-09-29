@@ -1,0 +1,30 @@
+@startuml
+abstract class MatchCommentator {
+  #output: CommentaryOutput
+  +onEvent(e): Outcome {final}
+  #isWorthMentioning(e): boolean
+  #describe(e): String
+  #toneFor(e): Tone
+}
+MatchCommentator <|-- BriefCommentator
+MatchCommentator <|-- DetailedCommentator
+DetailedCommentator <|-- AccessibleCommentator
+interface CommentaryOutput { +emit(text, tone) throws OutputException }
+CommentaryOutput <|.. ConsoleOutput
+CommentaryOutput <|.. SubtitleFileOutput
+CommentaryOutput <|.. SpeechOutput
+class SpeechOutput <<Adapter>>
+class LegacySpeechEngine { +speak(wpm, langCode, utterance): SpeechStatus }
+class SpeechStatus
+class AudioDeviceException <<RuntimeException>>
+class OutputException
+OutputException <|-- OutputUnavailableException
+OutputException <|-- OutputRejectedException
+MatchCommentator o--> CommentaryOutput : bridge
+SpeechOutput o--> LegacySpeechEngine : adaptee
+LegacySpeechEngine ..> SpeechStatus
+LegacySpeechEngine ..> AudioDeviceException
+CommentaryOutput ..> OutputException
+OutputResolver ..> CommentaryOutput
+CommentatorResolver ..> MatchCommentator
+@enduml
